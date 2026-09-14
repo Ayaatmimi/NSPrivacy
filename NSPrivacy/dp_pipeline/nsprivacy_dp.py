@@ -103,7 +103,7 @@ class NSPrivacyNet(nn.Module):
                 raise ValueError("labels are required for non-retention noise")
             reference_logits = self.classifier(z_masked)
             probabilities = reference_logits.softmax(dim=-1)
-            targets = F.one_hot(y, num_classes=self.num_classes).to(z_masked.dtype)
+            classes = torch.arange(self.num_classes, device=y.device)\n            targets = (y.unsqueeze(-1) == classes).to(z_masked.dtype)
             sensitivity = (probabilities - targets) @ self.classifier.weight
             scale = self.erase_sigma * sensitivity.abs().detach()
             z_masked = z_masked + torch.randn_like(z_masked) * scale
