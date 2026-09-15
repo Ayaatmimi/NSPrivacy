@@ -1,4 +1,4 @@
-"""Small synthetic check. This does not validate manuscript results."""
+"""Synthetic functional test for the NSPrivacy private trainer."""
 
 import math
 
