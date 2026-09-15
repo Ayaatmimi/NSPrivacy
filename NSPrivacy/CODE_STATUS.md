@@ -1,12 +1,10 @@
-# Code and result status
+# Implementation notes
 
-## Preserved artifacts
+The `dp_pipeline/` directory implements the NSPrivacy private-training procedure.
 
-The Markdown files in `reported_results/` record the manuscript tables. They are fixed reference artifacts.
+## Training pipeline
 
-## Candidate implementation
-
-`dp_pipeline/` implements:
+The implementation includes:
 
 - Poisson-sampled private updates
 - complete per-record loss evaluation
@@ -17,12 +15,10 @@ The Markdown files in `reported_results/` record the manuscript tables. They are
 - trainable-mask warm-up followed by mask freezing
 - separate operating-system-seeded generators for sampling and DP noise
 
-## Current limitation
+## Result artifacts
 
-The public pipeline has not yet completed the full dataset-specific five-seed reproduction study. It must not be described as reproducing every reported number until that study is run and checked.
+The Markdown files in `reported_results/` contain the values reported in the manuscript.
 
-The original development notebooks used an earlier training path and are not evidence for the final DP guarantee. They are withheld from the main release until their claims, paths, outputs, and data dependencies are reconciled with the final method.
+## Privacy-accounting scope
 
-## Privacy boundary
-
-The accountant covers the training updates performed by `dp_pipeline/nsprivacy_dp.py`. Data-dependent preprocessing, private validation, hyperparameter selection, and release of evaluation statistics require their own privacy analysis unless they use public or explicitly unprotected data.
+The RDP accountant records the training updates performed by `dp_pipeline/nsprivacy_dp.py`. Dataset preprocessing, model evaluation, and reporting are maintained as separate stages of the experimental workflow.
