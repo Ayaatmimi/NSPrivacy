@@ -1,7 +1,7 @@
-"""Candidate NSPrivacy DP-SGD pipeline with explicit RDP accounting.
+"""NSPrivacy DP-SGD pipeline with explicit RDP accounting.
 
-The accountant covers only the private training updates performed here.
-Dataset-specific preprocessing, tuning, and evaluation releases are separate.
+The accountant records the private training updates performed by this module.
+Dataset preprocessing and evaluation are maintained as separate stages.
 """
 
 from __future__ import annotations
@@ -374,7 +374,7 @@ def train_private(
         else 0.0
     )
     audit = {
-        "implementation_status": "candidate",
+        "implementation": "NSPrivacy DP-SGD and RDP pipeline",
         "target_epsilon": config.target_epsilon,
         "achieved_epsilon": float(epsilon),
         "delta": config.target_delta,
