@@ -1,4 +1,4 @@
-"""Command-line entry point for the candidate NSPrivacy private trainer."""
+"""Command-line entry point for the NSPrivacy private trainer."""
 
 import argparse
 
