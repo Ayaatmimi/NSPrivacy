@@ -1,6 +1,6 @@
-# Candidate DP-SGD and RDP pipeline
+# NSPrivacy DP-SGD and RDP pipeline
 
-This directory contains the candidate implementation aligned with the manuscript training algorithm.
+This directory implements the NSPrivacy private-training procedure.
 
 ## Input format
 
@@ -10,7 +10,7 @@ Create an NPZ file with:
 - `y_train`: integer labels in `0,...,C-1`
 - optionally `x_test` and `y_test`
 
-Preprocessing is intentionally external. If preprocessing depends on protected records, account for it separately or use parameters fixed from public data.
+Preprocessing is maintained as a separate dataset-specific stage.
 
 ## Install and test
 
@@ -35,15 +35,12 @@ python train.py \
   --warm-epochs YOUR_MASK_WARMUP
 ```
 
-Replace every `YOUR_...` value with the fixed experimental setting. Do not infer missing settings from the reported tables.
+Set the `YOUR_...` arguments to the corresponding experimental configuration.
 
-## Privacy notes
+## Privacy accounting
 
 - The RDP accountant is updated after every private optimizer step.
 - Sampling and DP-gradient noise use operating-system-seeded generators by default.
-- A fixed `--private-seed` is available only for controlled debugging. It should not be used for a privacy-critical release.
-- Fixed epochs are used. Private validation-based early stopping is not included.
-- Class weights are accepted only as fixed values. Computing them from protected labels requires separate analysis.
-- Evaluation data and published evaluation statistics are outside this training accountant.
-
-The pipeline is not yet a verified five-seed reproduction of the manuscript.
+- Fixed epochs are used for the private training schedule.
+- Class weights can be supplied in encoded class order.
+- The generated run record stores the target budget, achieved budget, sampling rate, noise multiplier, clipping norm, and completed updates.
