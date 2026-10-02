@@ -27,15 +27,18 @@ python train.py \
   --output outputs/run_01 \
   --num-classes 8 \
   --epsilon 0.114 \
-  --delta YOUR_FIXED_DELTA \
+  --delta 1e-5 \
   --epochs 100 \
-  --batch-size YOUR_BATCH_SIZE \
-  --max-grad-norm YOUR_CLIPPING_NORM \
-  --erase-sigma YOUR_ERASURE_SCALE \
-  --warm-epochs YOUR_MASK_WARMUP
+  --batch-size 256 \
+  --max-grad-norm 1.0 \
+  --erase-sigma 0.1 \
+  --lambda-sparse 1e-4 \
+  --lambda-design 1e-3 \
+  --warm-epochs 20
 ```
 
-Set the `YOUR_...` arguments to the corresponding experimental configuration.
+The command shows the selected manuscript configuration. Change the input and
+output paths and set the target privacy budget for the run.
 
 ## Privacy accounting
 
@@ -43,4 +46,9 @@ Set the `YOUR_...` arguments to the corresponding experimental configuration.
 - Sampling and DP-gradient noise use operating-system-seeded generators by default.
 - Fixed epochs are used for the private training schedule.
 - Class weights can be supplied in encoded class order.
-- The generated run record stores the target budget, achieved budget, sampling rate, noise multiplier, clipping norm, and completed updates.
+- Empty Poisson batches receive a noise-only update and are conservatively counted.
+- Gradients and noise are normalized by the fixed expected batch size.
+- The released run record omits private RNG seeds and class-weight values.
+- The audit record stores only public configuration, accountant outputs, and
+  epoch-level module status. It does not store masks, sensitivities,
+  representations, per-record gradients, or mini-batch statistics.

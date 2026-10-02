@@ -23,4 +23,5 @@ The task is binary in-hospital mortality prediction. Results are means over five
 * Number of runs: 5
 * Confidence-interval procedure: 1,000 bootstrap resamples
 * MIA AUC values closer to 0.5 indicate attack performance closer to random guessing.
-* The NSPrivacy configuration selected on CIC-IDS2017 was applied without additional tuning.
+* The NSPrivacy configuration selected on CIC-IDS2017 was applied without additional tuning, except for adapting the input and output layers to the dataset dimensions.
+* The data were divided using the same stratified 80/10/10 training, validation, and test split.

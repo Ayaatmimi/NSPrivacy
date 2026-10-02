@@ -13,6 +13,10 @@ NSPrivacy combines data minimization, individual non-retention, structural priva
 - `NSPrivacy/notebooks/`: experiment notebook directory
 - `NSPrivacy/CODE_STATUS.md`: implementation and privacy-accounting notes
 
+The private trainer uses Poisson sampling, complete per-record gradient
+clipping, Gaussian noise, RDP composition, projected budget checks, and a
+restricted technical audit trail.
+
 ## Data availability
 
 CIC-IDS2017 and MIMIC-IV are not redistributed by this repository. Users should obtain the datasets from their official sources and follow their respective access requirements.

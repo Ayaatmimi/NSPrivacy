@@ -38,4 +38,4 @@ Balanced accuracy values are percentages averaged over five seeds.
 * Number of runs: 5
 * Random seeds: 42, 123, 456, 789, and 1024
 * Primary metric: balanced accuracy
-* MIA AUC values closer to 0.5 indicate attack performance closer to random guessing.
+* MIA AUC values closer to 0.5 indicate attack performance closer to random guessing. Values below 0.5 are interpreted by their distance from 0.5 because they indicate reversed attack orientation.
