@@ -14,4 +14,4 @@ These are the frozen per-class recall values reported in the IEEE TKDE manuscrip
 | Infiltration         |     0.934 |     0.823 |        0.956 |          36 |
 | **Balanced average** | **0.968** | **0.889** |    **0.979** |         N/A |
 
-NSPrivacy exceeds DP-SGD for every class. The largest recall improvement is 0.111 for Infiltration. The improvements for Botnet and Web Attack are both 0.096.
+NSPrivacy exceeds DP-SGD for every class, with gains from 0.036 to 0.111. The largest improvement is for Infiltration. The gains for Botnet and Web Attack are both 0.096. Recall for Infiltration, Botnet, and Web Attack remains within 0.022, 0.017, and 0.021 of the non-private MLP, respectively.

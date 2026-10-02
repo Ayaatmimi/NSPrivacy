@@ -37,10 +37,10 @@ class TrainConfig:
     learning_rate: float = 1e-3
     weight_decay: float = 1e-4
     max_grad_norm: float = 1.0
-    erase_sigma: float = 0.05
+    erase_sigma: float = 0.1
     lambda_sparse: float = 1e-4
-    lambda_design: float = 1e-4
-    warm_epochs: int = 10
+    lambda_design: float = 1e-3
+    warm_epochs: int = 20
     public_seed: int = 0
     private_seed: Optional[int] = None
     class_weights: Optional[Sequence[float]] = None
@@ -184,7 +184,7 @@ def _per_record_gradients(
 def _set_private_gradients(
     model: NSPrivacyNet,
     per_record: Optional[Dict[str, torch.Tensor]],
-    expected_batch_size: int,
+    expected_batch_size: float,
     max_grad_norm: float,
     noise_multiplier: float,
     noise_generator: torch.Generator,
@@ -262,19 +262,14 @@ def train_private(
     ).to(device)
 
     dataset = TensorDataset(x_train.cpu().float(), y_train.cpu().long())
-    base_loader = DataLoader(
-        dataset,
-        batch_size=min(config.batch_size, len(dataset)),
-        shuffle=False,
-        drop_last=False,
-    )
-    sample_rate = 1.0 / len(base_loader)
+    expected_batch_size = float(min(config.batch_size, len(dataset)))
+    sample_rate = expected_batch_size / float(len(dataset))
     sampling_generator = _private_generator(torch.device("cpu"), config.private_seed)
-    private_loader = DPDataLoader.from_data_loader(
-        base_loader,
+    private_loader = DPDataLoader(
+        dataset,
+        sample_rate=sample_rate,
         generator=sampling_generator,
     )
-    expected_batch_size = max(1, int(round(len(dataset) * sample_rate)))
     planned_steps = config.epochs * len(private_loader)
 
     noise_multiplier = get_noise_multiplier(
@@ -295,7 +290,12 @@ def train_private(
         T_max=max(1, config.epochs),
     )
     accountant = RDPAccountant()
-    noise_generator = _private_generator(device, config.private_seed)
+    noise_seed = (
+        None
+        if config.private_seed is None
+        else int(config.private_seed) ^ 0x5DEECE66D
+    )
+    noise_generator = _private_generator(device, noise_seed)
 
     if config.class_weights is None:
         class_weights = torch.ones(config.num_classes, device=device)
@@ -309,6 +309,7 @@ def train_private(
     completed_steps = 0
     completed_epochs = 0
     stopped_for_budget = False
+    epoch_records = []
 
     model.train()
     for epoch in range(config.epochs):
@@ -365,6 +366,30 @@ def train_private(
 
         completed_epochs = epoch + 1
         scheduler.step()
+        epsilon_spent = (
+            accountant.get_epsilon(config.target_delta)
+            if completed_steps
+            else 0.0
+        )
+        epoch_records.append(
+            {
+                "epoch": completed_epochs,
+                "completed_private_updates": completed_steps,
+                "epsilon_spent": float(epsilon_spent),
+                "epsilon_budget": config.target_epsilon,
+                "delta": config.target_delta,
+                "sampling_rate": float(sample_rate),
+                "clipping_bound": config.max_grad_norm,
+                "noise_multiplier": float(noise_multiplier),
+                "mask_status": (
+                    "adaptive" if completed_epochs <= config.warm_epochs else "frozen"
+                ),
+                "erase_sigma": config.erase_sigma,
+                "sensitivity_rule": "absolute-logit-loss-gradient",
+                "lambda_t": float(design_weight),
+                "structural_design_active": bool(design_weight > 0),
+            }
+        )
         if stopped_for_budget:
             break
 
@@ -386,6 +411,9 @@ def train_private(
         "completed_epochs": completed_epochs,
         "stopped_before_budget_exceedance": stopped_for_budget,
         "mask_warm_epochs": config.warm_epochs,
+        "sensitivity_rule": "absolute-logit-loss-gradient",
+        "erase_sigma": config.erase_sigma,
+        "epoch_records": epoch_records,
         "private_rng_mode": (
             "operating-system-seeded"
             if config.private_seed is None
@@ -465,8 +493,14 @@ def save_run(
     destination = Path(output_dir)
     destination.mkdir(parents=True, exist_ok=True)
     torch.save(model.state_dict(), destination / "model_state.pt")
+    public_config = asdict(config)
+    public_config.pop("private_seed", None)
+    class_weights = public_config.pop("class_weights", None)
+    public_config["class_weights_status"] = (
+        "provided" if class_weights is not None else "uniform"
+    )
     record = {
-        "config": asdict(config),
+        "config": public_config,
         "privacy_audit": audit,
         "evaluation": evaluation,
     }

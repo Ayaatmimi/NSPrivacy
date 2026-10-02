@@ -17,10 +17,10 @@ def parse_args():
     parser.add_argument("--learning-rate", type=float, default=1e-3)
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
-    parser.add_argument("--erase-sigma", type=float, default=0.05)
+    parser.add_argument("--erase-sigma", type=float, default=0.1)
     parser.add_argument("--lambda-sparse", type=float, default=1e-4)
-    parser.add_argument("--lambda-design", type=float, default=1e-4)
-    parser.add_argument("--warm-epochs", type=int, default=10)
+    parser.add_argument("--lambda-design", type=float, default=1e-3)
+    parser.add_argument("--warm-epochs", type=int, default=20)
     parser.add_argument("--public-seed", type=int, default=0)
     parser.add_argument("--private-seed", type=int, default=None)
     parser.add_argument("--device", default=None)
@@ -29,7 +29,7 @@ def parse_args():
         type=float,
         nargs="+",
         default=None,
-        help="Fixed public weights in encoded class order.",
+        help="Fixed class weights in encoded class order.",
     )
     return parser.parse_args()
 
