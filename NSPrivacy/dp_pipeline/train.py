@@ -2,6 +2,8 @@
 
 import argparse
 
+import numpy as np
+
 from nsprivacy_dp import TrainConfig, evaluate, load_npz, save_run, train_private
 
 
@@ -15,6 +17,7 @@ def parse_args():
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--batch-size", type=int, default=256)
     parser.add_argument("--learning-rate", type=float, default=1e-3)
+    parser.add_argument("--min-learning-rate", type=float, default=1e-5)
     parser.add_argument("--weight-decay", type=float, default=1e-4)
     parser.add_argument("--max-grad-norm", type=float, default=1.0)
     parser.add_argument("--erase-sigma", type=float, default=0.1)
@@ -37,6 +40,11 @@ def parse_args():
 def main():
     args = parse_args()
     x_train, y_train, x_test, y_test = load_npz(args.data)
+    class_weights = args.class_weights
+    if class_weights is None:
+        with np.load(args.data, allow_pickle=False) as arrays:
+            if "class_weights" in arrays:
+                class_weights = arrays["class_weights"].astype(float).tolist()
     config = TrainConfig(
         input_dim=x_train.shape[1],
         num_classes=args.num_classes,
@@ -45,6 +53,7 @@ def main():
         epochs=args.epochs,
         batch_size=args.batch_size,
         learning_rate=args.learning_rate,
+        min_learning_rate=args.min_learning_rate,
         weight_decay=args.weight_decay,
         max_grad_norm=args.max_grad_norm,
         erase_sigma=args.erase_sigma,
@@ -53,7 +62,7 @@ def main():
         warm_epochs=args.warm_epochs,
         public_seed=args.public_seed,
         private_seed=args.private_seed,
-        class_weights=args.class_weights,
+        class_weights=class_weights,
         **({"device": args.device} if args.device else {}),
     )
     model, audit = train_private(x_train, y_train, config)

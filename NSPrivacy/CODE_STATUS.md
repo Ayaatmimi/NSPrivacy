@@ -17,10 +17,17 @@ The implementation includes:
 - fixed expected-batch normalization, including noise-only empty-batch updates
 - epoch-level audit records containing only permitted public configuration,
   accountant outputs, and module status
+- class-weighted per-record cross-entropy without mean-reduction cancellation
+- binary and multiclass AUROC evaluation
+- cosine annealing from $10^{-3}$ to $10^{-5}$
 
 ## Result artifacts
 
 The Markdown files in `reported_results/` contain the values reported in the manuscript.
+
+The `experiments/` directory contains leakage-safe tabular preprocessing, the
+five-seed launcher, non-private references, an output-based membership attack,
+PUE calculation, bootstrap intervals, and paired statistical testing.
 
 ## Privacy-accounting scope
 

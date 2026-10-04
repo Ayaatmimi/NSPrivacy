@@ -30,6 +30,8 @@ python train.py \
   --delta 1e-5 \
   --epochs 100 \
   --batch-size 256 \
+  --learning-rate 1e-3 \
+  --min-learning-rate 1e-5 \
   --max-grad-norm 1.0 \
   --erase-sigma 0.1 \
   --lambda-sparse 1e-4 \

@@ -5,6 +5,7 @@ NSPrivacy combines data minimization, individual non-retention, structural priva
 ## Components
 
 - `dp_pipeline/`: private training and privacy accounting
+- `experiments/`: preprocessing and evaluation utilities
 - `reported_results/`: all manuscript result tables and analysis summaries
 - `notebooks/`: experiment notebook directory
 - `CODE_STATUS.md`: implementation notes
@@ -24,3 +25,5 @@ clipping bound 1.0, `erase_sigma=0.1`, `lambda_sparse=1e-4`,
 `lambda_design=1e-3`, and 20 mask-adaptation epochs.
 
 Raw datasets are not distributed. MIMIC-IV access remains subject to its data-use requirements.
+
+The full workflow is documented in [`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md).

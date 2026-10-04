@@ -8,11 +8,10 @@ from __future__ import annotations
 
 import copy
 import json
-import math
 import secrets
 from dataclasses import asdict, dataclass
 from pathlib import Path
-from typing import Dict, Iterable, Optional, Sequence, Tuple
+from typing import Dict, Optional, Sequence, Tuple
 
 import numpy as np
 import torch
@@ -35,6 +34,7 @@ class TrainConfig:
     epochs: int = 100
     batch_size: int = 256
     learning_rate: float = 1e-3
+    min_learning_rate: float = 1e-5
     weight_decay: float = 1e-4
     max_grad_norm: float = 1.0
     erase_sigma: float = 0.1
@@ -53,6 +53,8 @@ class TrainConfig:
             raise ValueError("epsilon must be positive and delta must be in (0, 1)")
         if self.epochs < 1 or self.batch_size < 1:
             raise ValueError("epochs and batch_size must be positive")
+        if self.learning_rate <= 0 or not 0 <= self.min_learning_rate <= self.learning_rate:
+            raise ValueError("learning rates must satisfy 0 <= min_learning_rate <= learning_rate")
         if self.max_grad_norm <= 0 or self.erase_sigma < 0:
             raise ValueError("clipping norm must be positive and erase_sigma nonnegative")
         if not 0 <= self.warm_epochs <= self.epochs:
@@ -113,6 +115,20 @@ class NSPrivacyNet(nn.Module):
         return logits, z, mask
 
 
+def _record_cross_entropy(
+    logits: torch.Tensor,
+    y: torch.Tensor,
+    class_weights: torch.Tensor,
+) -> torch.Tensor:
+    """Weighted loss for one record without mean-reduction cancellation."""
+    return F.cross_entropy(
+        logits,
+        y.unsqueeze(0),
+        weight=class_weights,
+        reduction="sum",
+    )
+
+
 def _single_record_loss(
     params: Dict[str, torch.Tensor],
     buffers: Dict[str, torch.Tensor],
@@ -129,17 +145,16 @@ def _single_record_loss(
         (x.unsqueeze(0), y.unsqueeze(0), True),
         strict=False,
     )
-    prediction_loss = F.cross_entropy(
-        logits,
-        y.unsqueeze(0),
-        weight=class_weights,
-        reduction="mean",
-    )
-    sparse_weight = params.get("mask_net.2.weight")
-    if sparse_weight is None:
+    prediction_loss = _record_cross_entropy(logits, y, class_weights)
+    sparse_weights = [
+        value
+        for name, value in params.items()
+        if name.startswith("mask_net.") and name.endswith(".weight")
+    ]
+    if not sparse_weights:
         sparse_penalty = prediction_loss.new_zeros(())
     else:
-        sparse_penalty = sparse_weight.abs().sum()
+        sparse_penalty = sum(weight.abs().sum() for weight in sparse_weights)
     design_penalty = z.square().sum()
     return (
         prediction_loss
@@ -288,6 +303,7 @@ def train_private(
     scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(
         optimizer,
         T_max=max(1, config.epochs),
+        eta_min=config.min_learning_rate,
     )
     accountant = RDPAccountant()
     noise_seed = (
@@ -376,6 +392,9 @@ def train_private(
                 "epoch": completed_epochs,
                 "completed_private_updates": completed_steps,
                 "epsilon_spent": float(epsilon_spent),
+                "epsilon_remaining": max(
+                    0.0, config.target_epsilon - float(epsilon_spent)
+                ),
                 "epsilon_budget": config.target_epsilon,
                 "delta": config.target_delta,
                 "sampling_rate": float(sample_rate),
@@ -385,6 +404,7 @@ def train_private(
                     "adaptive" if completed_epochs <= config.warm_epochs else "frozen"
                 ),
                 "erase_sigma": config.erase_sigma,
+                "lambda_sparse": config.lambda_sparse,
                 "sensitivity_rule": "absolute-logit-loss-gradient",
                 "lambda_t": float(design_weight),
                 "structural_design_active": bool(design_weight > 0),
@@ -451,14 +471,19 @@ def evaluate(
         "macro_f1": float(f1_score(target, prediction, average="macro")),
     }
     try:
-        result["macro_auroc"] = float(
-            roc_auc_score(
-                target,
-                probability,
-                multi_class="ovr",
-                average="macro",
+        if probability.shape[1] == 2:
+            result["macro_auroc"] = float(
+                roc_auc_score(target, probability[:, 1])
             )
-        )
+        else:
+            result["macro_auroc"] = float(
+                roc_auc_score(
+                    target,
+                    probability,
+                    multi_class="ovr",
+                    average="macro",
+                )
+            )
     except ValueError:
         result["macro_auroc"] = None
     return result

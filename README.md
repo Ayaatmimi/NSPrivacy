@@ -9,6 +9,8 @@ NSPrivacy combines data minimization, individual non-retention, structural priva
 ## Repository contents
 
 - `NSPrivacy/dp_pipeline/`: NSPrivacy DP-SGD and RDP-accounting implementation
+- `NSPrivacy/experiments/`: preprocessing, repeated-seed, baseline, MIA, PUE,
+  bootstrap, and statistical-testing utilities
 - `NSPrivacy/reported_results/`: all results reported in the manuscript
 - `NSPrivacy/notebooks/`: experiment notebook directory
 - `NSPrivacy/CODE_STATUS.md`: implementation and privacy-accounting notes
@@ -21,6 +23,15 @@ restricted technical audit trail.
 
 CIC-IDS2017 and MIMIC-IV are not redistributed by this repository. Users should obtain the datasets from their official sources and follow their respective access requirements.
 
+## Reproducibility
+
+See [`REPRODUCIBILITY.md`](REPRODUCIBILITY.md) for the verified environment,
+data format, five-seed launcher, and evaluation workflow. See
+[`MANUSCRIPT_ALIGNMENT.md`](MANUSCRIPT_ALIGNMENT.md) for the two manuscript
+sentences that must remain consistent with the released audit boundary and
+per-class calculations.
+
 ## Citation
 
-Citation information will be added after the manuscript receives an archival record.
+Metadata for the manuscript is provided in [`CITATION.cff`](CITATION.cff).
+The software is released under the MIT License.
