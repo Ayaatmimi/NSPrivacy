@@ -5,7 +5,7 @@ NSPrivacy combines data minimization, individual non-retention, structural priva
 ## Components
 
 - `dp_pipeline/`: private training and privacy accounting
-- `reported_results/`: manuscript result tables
+- `reported_results/`: all manuscript result tables and analysis summaries
 - `notebooks/`: experiment notebook directory
 - `CODE_STATUS.md`: implementation notes
 
