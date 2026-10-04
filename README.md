@@ -9,7 +9,7 @@ NSPrivacy combines data minimization, individual non-retention, structural priva
 ## Repository contents
 
 - `NSPrivacy/dp_pipeline/`: NSPrivacy DP-SGD and RDP-accounting implementation
-- `NSPrivacy/reported_results/`: results reported in the manuscript
+- `NSPrivacy/reported_results/`: all results reported in the manuscript
 - `NSPrivacy/notebooks/`: experiment notebook directory
 - `NSPrivacy/CODE_STATUS.md`: implementation and privacy-accounting notes
 
