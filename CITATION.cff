@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite the NSPrivacy manuscript."
+title: "NSPrivacy: A Neuro-Symbolic Framework for Privacy-Preserving Data Classification"
+type: software
+authors:
+  - family-names: Wang
+    given-names: Zhi-Jie
+  - family-names: Mimi
+    given-names: Mimuna
+repository-code: "https://github.com/Ayaatmimi/NSPrivacy"
+license: MIT
+date-released: 2026-10-04

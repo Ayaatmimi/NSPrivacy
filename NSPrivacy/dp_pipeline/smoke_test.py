@@ -6,7 +6,7 @@ import tempfile
 
 import torch
 
-from nsprivacy_dp import TrainConfig, save_run, train_private
+from nsprivacy_dp import TrainConfig, evaluate, save_run, train_private
 
 
 def main():
@@ -31,6 +31,24 @@ def main():
     assert audit["completed_steps"] > 0
     assert len(audit["epoch_records"]) == audit["completed_epochs"]
     assert "epsilon_budget" in audit["epoch_records"][0]
+    assert "epsilon_remaining" in audit["epoch_records"][0]
+    assert "lambda_sparse" in audit["epoch_records"][0]
+    binary_model, _ = train_private(
+        x,
+        (y > 0).long(),
+        TrainConfig(
+            input_dim=4,
+            num_classes=2,
+            target_epsilon=8.0,
+            target_delta=1e-5,
+            epochs=1,
+            batch_size=8,
+            warm_epochs=1,
+            device="cpu",
+        ),
+    )
+    binary_metrics = evaluate(binary_model, x, (y > 0).long())
+    assert binary_metrics["macro_auroc"] is not None
     with tempfile.TemporaryDirectory() as output_dir:
         save_run(output_dir, model, config, audit)
         record = __import__("json").loads(
