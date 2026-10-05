@@ -11,6 +11,6 @@ These files provide a readable record of the quantitative results reported in th
 - [PUE component and weight-sensitivity results](PUE_RESULTS.md)
 - [Training dynamics and hyperparameter sensitivity](TRAINING_AND_SENSITIVITY.md)
 
-Unless otherwise stated, CIC-IDS2017 results are reported over five seeds: 42, 123, 456, 789, and 1024. The main privacy parameter is (delta=10^{-5}).
+Unless otherwise stated, CIC-IDS2017 results are reported over five seeds: 42, 123, 456, 789, and 1024. The main privacy parameter is delta = 10^-5.
 
 New experiment outputs are written to user-selected directories and remain separate from these manuscript records.
