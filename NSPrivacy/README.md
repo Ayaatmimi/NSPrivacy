@@ -1,29 +1,25 @@
-# NSPrivacy
+# NSPrivacy implementation
 
-NSPrivacy combines data minimization, individual non-retention, structural privacy design, and DP-SGD with RDP accounting.
+This directory contains the model, private-training pipeline, experiment utilities, and manuscript result records.
 
 ## Components
 
-- `dp_pipeline/`: private training and privacy accounting
-- `experiments/`: preprocessing and evaluation utilities
-- `reported_results/`: all manuscript result tables and analysis summaries
-- `notebooks/`: experiment notebook directory
-- `CODE_STATUS.md`: implementation notes
+- [`dp_pipeline/`](dp_pipeline/): NSPrivacy model, DP-SGD, privacy filtering, RDP accounting, evaluation, and audit export
+- [`experiments/`](experiments/): preprocessing, repeated-seed execution, reference baselines, and evaluation utilities
+- [`reported_results/`](reported_results/): manuscript result tables and analyses
+- [`CODE_STATUS.md`](CODE_STATUS.md): implementation and accounting notes
 
-## Quick start
+## Quick check
+
+From the repository root:
 
 ```bash
-cd dp_pipeline
-python -m pip install -r requirements.txt
-python smoke_test.py
+python -m pip install -r NSPrivacy/requirements.txt
+python NSPrivacy/dp_pipeline/smoke_test.py
 ```
 
-Prepare an NPZ file containing `x_train` and `y_train`, then follow `dp_pipeline/README.md` for training.
+## Manuscript configuration
 
-The manuscript configuration uses 100 epochs, an expected batch size of 256,
-clipping bound 1.0, `erase_sigma=0.1`, `lambda_sparse=1e-4`,
-`lambda_design=1e-3`, and 20 mask-adaptation epochs.
+The selected configuration uses 100 epochs, an expected Poisson batch size of 256, clipping bound 1.0, `erase_sigma=0.1`, `lambda_sparse=1e-4`, `lambda_design=1e-3`, and 20 mask-adaptation epochs. The DP-SGD noise multiplier is calibrated separately for each target privacy budget.
 
-Raw datasets are not distributed. MIMIC-IV access remains subject to its data-use requirements.
-
-The full workflow is documented in [`../REPRODUCIBILITY.md`](../REPRODUCIBILITY.md).
+See the root [reproducibility guide](../REPRODUCIBILITY.md), [data guide](../DATA.md), and [paper-to-code map](../MANUSCRIPT_ALIGNMENT.md) for the complete workflow.
